@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Toang rồi bạn ơi</h1>
+<br>
+<h2>Create Customer</h2>
+<form>
+    <table border="1px" cellpadding="5px">
+        <tr>
+            <td>Name</td>
+            <td>
+                <input type="text" id="name">
+            </td>
+        </tr>
+        <tr>
+            <td>Age</td>
+            <td>
+                <input type="number" id="age">
+            </td>
+        </tr>
+        <tr>
+            <td>Province</td>
+            <td>
+                <select id="province">
+                    <th:block th:each="p: ${provinces}">
+                        <option th:value="${p.id}" th:text="${p.name}"></option>
+                    </th:block>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="Create" onclick="addCustomer()">
+            </td>
+        </tr>
+    </table>
+    <br>
+    <form action="">
+        <input type="text" id="search">
+        <input type="submit" value="search">
+    </form>
+    <br>
+    <h2>List Customer</h2>
+<table border="1px">
+    <tr>
+        <td>Id</td>
+        <td>Name</td>
+        <td>Age</td>
+        <td>Province</td>
+    </tr>
+    <tr>
+        <tbody id="list">
+        <th:block th:each="c: ${customers}">
+            <tr>
+                <td th:text="${c.id}" ></td>
+                <td th:value="${c.id}" hidden id="id"></td>
+                <td th:text="${c.name}"></td>
+                <td th:text="${c.age}"></td>
+                <td th:text="${c.province.name}"></td>
+                <td>
+                    <a class="deleteClass" th:href="@{/home/delete/__${c.id}__}">Delete</a>
+                </td>
+                <td>
+                    <a th:href="@{/home/edit/__${c.id}__}">Edit</a>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </tr>
+</table>
+</form>
+</body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+    function addCustomer(){
+        let nameCus = $('#name').val();
+        let ageCus = $('#age').val();
+        let  provinceID = $("#province").val();
+        let newCustomer = {
+            name: nameCus,
+            age: ageCus,
+            province: {
+                id: provinceID,
+            }
+        }
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            url:"home/create",
+            type: "POST",
+            data: JSON.stringify(newCustomer),
+            success: function (){
+                showList("home/data")
+            }
+        })
+        event.preventDefault();
+    }
+    function showList(url){
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (ctm){
+                let content = "";
+                for (let i = 0; i < ctm.length; i++) {
+                    content += `<tr>
+                <td>${ctm[i].id}</td>
+                <td>${ctm[i].name}</td>
+                <td>${ctm[i].age}</td>
+                <td>${ctm[i].province.name}</td>
+
+            </tr>`
+                }
+                $('#list').html(content);
+            }
+        })
+    }
+    $(document).ready(function () {
+        var deleteLink = $("a:contains('Delete')");
+        $(deleteLink).click(function (event) {
+            $.ajax({
+                url: $(event.target).attr("href"),
+                type: "DELETE",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                success: function () {
+                    var rowToDelete = $(event.target).closest("tr");
+                    rowToDelete.remove();
+                }
+            });
+            event.preventDefault();
+        });
+    });
+
+
+</script>
+</html>
