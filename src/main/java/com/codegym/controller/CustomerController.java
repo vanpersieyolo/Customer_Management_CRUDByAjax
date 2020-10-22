@@ -49,7 +49,7 @@ public class CustomerController {
         customerService.remove(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    @PostMapping("/search")
+    @GetMapping("/search/{name}")
     public ResponseEntity<Customer> searach(@PathVariable String name){
         customerService.findAllByNameContaining(name);
         return new ResponseEntity<>(HttpStatus.OK);

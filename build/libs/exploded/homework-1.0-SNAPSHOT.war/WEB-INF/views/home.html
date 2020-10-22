@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<h1>Toang rồi bạn ơi</h1>
+<h1>List Customer</h1>
 <br>
 <h2>Create Customer</h2>
 <form>
@@ -40,8 +40,9 @@
     </table>
     <br>
     <form action="">
-        <input type="text" id="search">
-        <input type="submit" value="search">
+        <h3>tìm kiếm</h3>
+        <input type="text" id="nameSearch" placeholder="input name" >
+        <input type="submit" onclick="search()" value="tìm kiếm" >
     </form>
     <br>
     <h2>List Customer</h2>
@@ -54,21 +55,7 @@
     </tr>
     <tr>
         <tbody id="list">
-        <th:block th:each="c: ${customers}">
-            <tr>
-                <td th:text="${c.id}" ></td>
-                <td th:value="${c.id}" hidden id="id"></td>
-                <td th:text="${c.name}"></td>
-                <td th:text="${c.age}"></td>
-                <td th:text="${c.province.name}"></td>
-                <td>
-                    <a class="deleteClass" th:href="@{/home/delete/__${c.id}__}">Delete</a>
-                </td>
-                <td>
-                    <a th:href="@{/home/edit/__${c.id}__}">Edit</a>
-                </td>
-            </tr>
-        </th:block>
+
         </tbody>
     </tr>
 </table>
@@ -96,49 +83,45 @@
             type: "POST",
             data: JSON.stringify(newCustomer),
             success: function (){
-                showList("home/data")
+                showList()
             }
         })
         event.preventDefault();
     }
-    function showList(url){
+    function showList(){
         $.ajax({
             type: "GET",
-            url: url,
+            url: "home/data",
             success: function (ctm){
                 let content = "";
                 for (let i = 0; i < ctm.length; i++) {
-                    content += `<tr>
+                    content +=`<tr id="i"+${i}>
                 <td>${ctm[i].id}</td>
                 <td>${ctm[i].name}</td>
                 <td>${ctm[i].age}</td>
                 <td>${ctm[i].province.name}</td>
-
+                <td><a class="deleteClass" href="javascript:;" onclick="remove(${ctm[i].id},event)">Delete</a></td>
+                <td><a class="editClass" th:href="/home/edit/${ctm[i].id}">Edit</a></td>
             </tr>`
                 }
                 $('#list').html(content);
             }
         })
     }
-    $(document).ready(function () {
-        var deleteLink = $("a:contains('Delete')");
-        $(deleteLink).click(function (event) {
-            $.ajax({
-                url: $(event.target).attr("href"),
-                type: "DELETE",
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                success: function () {
-                    var rowToDelete = $(event.target).closest("tr");
-                    rowToDelete.remove();
-                }
-            });
-            event.preventDefault();
+    function remove(id,event){
+        $.ajax({
+            url: "home/delete/"+ id,
+            type: "DELETE",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            success: function (response) {
+                var rowToDelete = $(event.target).closest("tr");
+                rowToDelete.remove();
+            }
         });
-    });
-
-
+    }
+    showList();
 </script>
 </html>
